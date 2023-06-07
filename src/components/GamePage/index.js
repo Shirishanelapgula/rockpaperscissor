@@ -38,7 +38,13 @@ const choicesList = [
 ]
 
 class GamePage extends Component {
-  state = {score: 0, isGameInProgress: true, yourChoice: choicesList[0].id}
+  state = {
+    score: 0,
+    isGameInProgress: true,
+    choice: choicesList[0],
+    oppo: choicesList[0],
+    result: '',
+  }
 
   renderGame = () => (
     <ListContainer>
@@ -53,27 +59,50 @@ class GamePage extends Component {
   }
 
   gameChanged = id => {
-    this.setState({yourChoice: id, isGameInProgress: false})
-  }
+    const {score} = this.state
+    const item = choicesList.find(each => each.id === id)
+    const ind = Math.floor(Math.random() * choicesList.length)
+    const opponent = choicesList[ind]
 
-  gameWon = () => {
-    this.setState(prevState => ({score: prevState.score + 1}))
-  }
+    let text
 
-  gameLose = () => {
-    this.setState(prevState => ({score: prevState.score - 1}))
+    if (item.id === 'PAPER' && opponent.id === 'ROCK') {
+      text = 'YOU WON'
+    } else if (item.id === 'SCISSORS' && opponent.id === 'ROCK') {
+      text = 'YOU LOSE'
+    } else if (item.id === 'ROCK' && opponent.id === 'PAPER') {
+      text = 'YOU LOSE'
+    } else if (item.id === 'SCISSORS' && opponent.id === 'PAPER') {
+      text = 'YOU WON'
+    } else if (item.id === 'ROCK' && opponent.id === 'SCISSORS') {
+      text = 'YOU LOSE'
+    } else if (item.id === 'PAPER' && opponent.id === 'SCISSORS') {
+      text = 'YOU LOSE'
+    } else if (item.id === opponent.id) {
+      text = 'IT IS DRAW'
+    }
+
+    let newScore = score
+    if (text === 'YOU WON') {
+      newScore += 1
+    } else if (text === 'YOU LOSE') {
+      newScore -= 1
+    }
+
+    this.setState({
+      isGameInProgress: false,
+      choice: item,
+      oppo: opponent,
+      result: text,
+      score: newScore,
+    })
   }
 
   renderResult = () => {
-    const {yourChoice} = this.state
+    const {choice, oppo, result} = this.state
 
     return (
-      <ResultsPage
-        yourChoice={yourChoice}
-        gameWon={this.gameWon}
-        gameLose={this.gameLose}
-        play={this.play}
-      />
+      <ResultsPage play={this.play} choice={choice} oppo={oppo} text={result} />
     )
   }
 
@@ -113,5 +142,3 @@ class GamePage extends Component {
     )
   }
 }
-
-export default GamePage
